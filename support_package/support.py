@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString
 import datetime
 import os
+import keywords
 
 path = os.getcwd()
 folder_name = "url_product"
@@ -33,10 +34,30 @@ def find_data_attribute(soup:BeautifulSoup, name:str, attrs:str, add_attribute:s
 def scraped_date():
     return datetime.date.today().strftime("%d/%m/%Y")
 
-def get_url_txt(keyword, url):
+def get_url_txt(url, keyword, search_position):
     if not os.path.isdir(path + "\\" + folder_name):
         os.makedirs(path + "\\" + folder_name)
 
-    with open(f"{path}\\{folder_name}\\{keyword}_url.txt", "a", encoding="utf-8-sig") as file_url:
-        file_url.write(f"{url}\n")
+    if " " in keyword:
+        file_path = os.path.join(path, folder_name, f"{keyword[:6]}_{keyword[7:]}_url.txt")
+    else:
+        file_path = os.path.join(path, folder_name, f"{keyword}_url.txt")
+
+    with open(file_path, "a", encoding="utf-8-sig") as file_url:
+        file_url.write(f"{url},{keyword},{search_position}\n")
+
+def get_product_url(product_url:list, keyword):
+    if " " in keyword:
+        file_path = os.path.join(path, folder_name, f"{keyword[:6]}_{keyword[7:]}_url.txt")
+    else:
+        file_path = os.path.join(path, folder_name, f"{keyword}_url.txt")
+
+    if os.path.isdir(path + "\\" + folder_name):
+        if os.path.exists(file_path):
+            print(f"file {file_path} is found")
+            with open(file_path, "r", encoding="utf-8-sig") as file:
+                for line in file:
+                    data = line.strip().split(",")
+                    product_url.append(data)
+
  

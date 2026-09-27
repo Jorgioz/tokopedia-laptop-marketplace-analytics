@@ -12,6 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
 from support_package import support
+import keywords
 
 options = webdriver.ChromeOptions()
 # options.add_argument("--disable-background-timer-throttling")
@@ -21,19 +22,6 @@ driver = uc.Chrome(options=options, version_main=153)        # version_main is C
 driver.maximize_window()
 
 wait = WebDriverWait(driver, 20)
-
-keywords = [
-    "laptop", "laptop terbaik", "laptop terbaru",
-    "laptop gaming", "laptop kerja", "laptop mahasiswa", "laptop kantor", "laptop editing", "laptop programming",
-    "laptop asus", "laptop lenovo", "laptop acer", "laptop hp", "laptop dell", "laptop msi", "laptop axioo", "laptop advan", "macbook"
-]
-
-headers = [
-    "product_name", "category_name", "keyword", "condition", "current_price", "original_price", "discount_percentage", "rating", "review_count", "sold_count", "search_position", "scraped_date",
-    "seller_name", "seller_rating", "seller_location", "store_type", "product_url"
-]
-
-keyword_not_exist = []
 
 def check_if_exist(xpath, timeout = 20):
     try:
@@ -78,9 +66,9 @@ def click_more(keyword):
                 time.sleep(random.uniform(1.5, 2.0))
                 print(f"click more {more}")
                 more+=1
-            elif more >= 1:       # The amount of scrolling performed
+            elif more >= 1:         # The amount of "Click More" is showed
                 break
-            elif scroll >= 20:
+            elif scroll >= 20:      # The amount of scrolling performed
                 break
 
             scroll+=1
@@ -89,8 +77,6 @@ def click_more(keyword):
             print(f"Timeout to Click More Keyword {keyword}")
             print(f"Error Type: {type(e).__name__}")
             print(f"Error: {e}")
-            # traceback.print_exc()
-            keyword_not_exist.append(keyword)
 
 
 def get_data_url(product_url, result:list, search_position, keyword, total_data):
@@ -127,7 +113,7 @@ def get_data_url(product_url, result:list, search_position, keyword, total_data)
             seller_name, seller_rating, seller_location, store_type, product_url
         ]
 
-        result.append(dict(zip(headers, value)))
+        result.append(dict(zip(keywords.headers, value)))
 
     except Exception as e:
         print(f"Timeout to get data {total_data}, keyword {keyword}")
@@ -138,10 +124,10 @@ def get_data_url(product_url, result:list, search_position, keyword, total_data)
     print(f"succesfully retrieved all data in link {search_position}\n")
 
 
-def main():
-    print("===== STARTING SCRAPING THE DATA =====")
-    product_url = []
-    for keyword in keywords:
+def save_url():
+    print("===== STARTING TO SCRAPING THE DATA =====")
+    # product_url = []
+    for keyword in keywords.keywords:
         if " " in keyword:
             # url = f"https://www.tokopedia.com/search?st=&q=laptop&srp_component_id=02.01.00.00&srp_page_id=&srp_page_title=&navsource="
             url = f"https://www.tokopedia.com/search?st=&q=laptop%20{keyword[7:]}&srp_component_id=02.01.00.00&srp_page_id=&srp_page_title=&navsource="
@@ -166,23 +152,27 @@ def main():
             if element.find("a", class_="Ui5-B4CDAk4Cv-cjLm4o0g== XeGJAOdlJaxl4+UD3zEJLg=="):
                 search_position+=1
                 url = element.find("a", class_="Ui5-B4CDAk4Cv-cjLm4o0g== XeGJAOdlJaxl4+UD3zEJLg==")["href"]
-                product_url.append([url, keyword, search_position])
+                # product_url.append([url, keyword, search_position])
 
-                support.get_url_txt(keyword, url)
+                support.get_url_txt(url, keyword, search_position)
 
         print(f"Successfully retrieved all data in keyword {keyword}")
         print(f"Total url in keyword {keyword} : {search_position}")
         
         time.sleep(random.uniform(3.0, 5.0))
 
+def save_data_product():
     total_data = 1
     results = []
+    product_url = []
+    for keyword in keywords.keywords:
+        support.get_product_url(product_url, keyword)
     for data_url in product_url:
         get_data_url(data_url[0], results, data_url[2], data_url[1], total_data)
         total_data+=1
     
     with open("tokopedia_raw_dataset.csv", 'w', encoding="utf-8-sig", newline="") as file:
-        writer = csv.DictWriter(file, headers)
+        writer = csv.DictWriter(file, keywords.headers)
         writer.writeheader()
         writer.writerows(results)
         # Back to home
@@ -195,14 +185,8 @@ def main():
 
 if __name__ == "__main__":
     try:
-        keyword_not_exist = []
-        main()
+        save_url()
+        save_data_product()
     finally:
         print("===== Finished scraping the data =====\n")
-        if len(keyword_not_exist) > 0:
-            print("There are several keywords that failed to scrape. Please retry scraping the following keywords:\n")
-            for keyword in keyword_not_exist:
-                print(keyword)
-        else:
-            print("All data has been scraped")
         driver.quit()
