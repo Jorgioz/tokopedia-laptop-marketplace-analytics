@@ -1,0 +1,30 @@
+GENERIC
+| No | Keyword          | Tujuan                                           |
+| -- | ---------------- | ------------------------------------------------ |
+| 1  | `laptop`         | Baseline seluruh pasar                           |
+| 2  | `laptop murah`   | Low-price segment                                |
+| 3  | `laptop terbaik` | Produk yang diposisikan sebagai pilihan unggulan |
+| 4  | `laptop terbaru` | Produk/model yang relatif baru                   |
+
+USE_CASE
+| No | Keyword              | Tujuan                   |
+| -- | -------------------- | ------------------------ |
+| 5  | `laptop gaming`      | Gaming segment           |
+| 6  | `laptop kerja`       | Work/business segment    |
+| 7  | `laptop mahasiswa`   | Student segment          |
+| 8  | `laptop kantor`      | Office segment           |
+| 9  | `laptop editing`     | Creative/content segment |
+| 10 | `laptop programming` | Developer segment        |
+
+BRAND
+| No | Keyword         | Tujuan      |
+| -- | --------------- | ----------- |
+| 11 | `laptop asus`   | ASUS        |
+| 12 | `laptop lenovo` | Lenovo      |
+| 13 | `laptop acer`   | Acer        |
+| 14 | `laptop hp`     | HP          |
+| 15 | `laptop dell`   | Dell        |
+| 16 | `laptop msi`    | MSI         |
+| 17 | `laptop axioo`  | Brand lokal |
+| 18 | `laptop advan`  | Brand lokal |
+| 19 | `macbook`       | Apple       |
