@@ -2,10 +2,9 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString
 import datetime
 import os
-import keywords
 
 path = os.getcwd()
-folder_name = "url_product"
+folder_name = "product_urls"
 
 def find_data(soup:BeautifulSoup, name:str, attrs:str, data = "data") -> NavigableString:
     if soup.find(name, attrs):
@@ -39,25 +38,22 @@ def get_url_txt(url, keyword, search_position):
         os.makedirs(path + "\\" + folder_name)
 
     if " " in keyword:
-        file_path = os.path.join(path, folder_name, f"{keyword[:6]}_{keyword[7:]}_url.txt")
+        file_path = os.path.join(path, folder_name, f"{keyword[:6]}_{keyword[7:]}_urls.txt")
     else:
-        file_path = os.path.join(path, folder_name, f"{keyword}_url.txt")
+        file_path = os.path.join(path, folder_name, f"{keyword}_urls.txt")
 
     with open(file_path, "a", encoding="utf-8-sig") as file_url:
         file_url.write(f"{url},{keyword},{search_position}\n")
 
 def get_product_url(product_url:list, keyword):
     if " " in keyword:
-        file_path = os.path.join(path, folder_name, f"{keyword[:6]}_{keyword[7:]}_url.txt")
+        file_path = os.path.join(path, folder_name, f"{keyword[:6]}_{keyword[7:]}_urls.txt")
     else:
-        file_path = os.path.join(path, folder_name, f"{keyword}_url.txt")
+        file_path = os.path.join(path, folder_name, f"{keyword}_urls.txt")
 
-    if os.path.isdir(path + "\\" + folder_name):
-        if os.path.exists(file_path):
-            print(f"file {file_path} is found")
-            with open(file_path, "r", encoding="utf-8-sig") as file:
-                for line in file:
-                    data = line.strip().split(",")
-                    product_url.append(data)
-
- 
+    if os.path.isfile(file_path):
+        print(f"file {file_path} is found")
+        with open(file_path, "r", encoding="utf-8-sig") as file:
+            for line in file:
+                data = line.strip().split(",")
+                product_url.append(data)

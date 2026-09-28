@@ -66,7 +66,7 @@ def click_more(keyword):
                 time.sleep(random.uniform(1.5, 2.0))
                 print(f"click more {more}")
                 more+=1
-            elif more >= 1:         # The amount of "Click More" is showed
+            elif more >= 5:         # The amount of "Click More" is showed
                 break
             elif scroll >= 20:      # The amount of scrolling performed
                 break
@@ -181,12 +181,15 @@ def save_data_product():
         # time.sleep(2)
 
     # driver.save_screenshot("Home.png")
+
+def menu():
+    save_data_product()
+    save_url()
     
 
 if __name__ == "__main__":
     try:
-        save_url()
-        save_data_product()
+        menu()
     finally:
         print("===== Finished scraping the data =====\n")
         driver.quit()
