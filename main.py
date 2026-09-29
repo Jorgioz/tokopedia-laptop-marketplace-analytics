@@ -8,17 +8,16 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
 from support_package import support
 import keywords
 
 options = webdriver.ChromeOptions()
-# options.add_argument("--disable-background-timer-throttling")
+
+# Prevent renderer backgrounding due to occlusion
 options.add_argument("--disable-backgrounding-occluded-windows")
-# options.add_argument("--disable-renderer-backgrounding")
-driver = uc.Chrome(options=options, version_main=153)        # version_main is Chrome Version
+driver = uc.Chrome(options=options, version_main=153)
 driver.maximize_window()
 
 wait = WebDriverWait(driver, 20)
@@ -53,10 +52,6 @@ def click_more(keyword):
                 driver.execute_script("window.scrollBy(0,1000)")
                 time.sleep(random.uniform(0.5, 1.0))
                 print("Data:", len(driver.find_elements(By.XPATH, "//div[@class='css-5wh65g']")))
-                # print(i)
-                # driver.execute_script("window.scrollBy(0,1000)")
-                # time.sleep(random.uniform(0.3, 0.5))
-                # driver.execute_script("window.scrollBy(0,1000)")
 
             xpath = "//span[contains(text(), 'Muat Lebih Banyak')]"
 
@@ -94,7 +89,7 @@ def get_data_url(product_url, result:list, search_position, keyword, total_data)
         # Get Dataset
         product_name = support.find_data(soup, "div", {"class":"css-1nylpq2"}, "product_name")
         category_name = support.find_category_name(soup, "a", {"class":"css-1oriv31-unf-heading e1qvo2ff7"})
-        condition = support.find_data(soup, "li", {"class":"css-1i6xy22"}, "condition")[9:]
+        condition = support.find_data(soup, "li", {"class":"css-1i6xy22"}, "condition")[8:]
         current_price = support.find_data(soup, "div", {"class":"price"}, "current_price")
         original_price = support.find_data(soup, "div", {"class":"original-price"}, "original_price")
         discount_percentage = support.find_data(soup, "div", {"class":"css-1c4ggdd"}, "discount_percentage")
@@ -117,42 +112,32 @@ def get_data_url(product_url, result:list, search_position, keyword, total_data)
 
     except Exception as e:
         print(f"Timeout to get data {total_data}, keyword {keyword}")
-        # print(f"Error Type: {type(e).__name__}")
-        # print(f"Error: {e}")
-        # traceback.print_exc()
 
     print(f"succesfully retrieved all data in link {search_position}\n")
 
 
 def save_url():
     print("===== STARTING TO SCRAPING THE DATA =====")
-    # product_url = []
     for keyword in keywords.keywords:
         if " " in keyword:
-            # url = f"https://www.tokopedia.com/search?st=&q=laptop&srp_component_id=02.01.00.00&srp_page_id=&srp_page_title=&navsource="
             url = f"https://www.tokopedia.com/search?st=&q=laptop%20{keyword[7:]}&srp_component_id=02.01.00.00&srp_page_id=&srp_page_title=&navsource="
         else:
-            # url = f"https://www.tokopedia.com/search?st=&q=laptop%20{keyword[7:]}&srp_component_id=02.01.00.00&srp_page_id=&srp_page_title=&navsource="
             url = f"https://www.tokopedia.com/search?st=&q={keyword}&srp_component_id=02.01.00.00&srp_page_id=&srp_page_title=&navsource="
-        # url = "https://www.tokopedia.com/"
+
         driver.get(url)
         time.sleep(random.uniform(3.0, 5.0))
 
         click_more(keyword)
 
-        # time.sleep(10)
         time.sleep(random.uniform(2.0, 3.0))
         soup = BeautifulSoup(driver.page_source, "lxml")     
         elements = soup.find_all("div", class_="css-5wh65g")
-        # all_elements = soup.find_all("div", class_="css-jza1fo")
-        # print(f"Total data: {len(all_elements)}")
         
         search_position = 0
         for element in elements:
             if element.find("a", class_="Ui5-B4CDAk4Cv-cjLm4o0g== XeGJAOdlJaxl4+UD3zEJLg=="):
                 search_position+=1
                 url = element.find("a", class_="Ui5-B4CDAk4Cv-cjLm4o0g== XeGJAOdlJaxl4+UD3zEJLg==")["href"]
-                # product_url.append([url, keyword, search_position])
 
                 support.get_url_txt(url, keyword, search_position)
 
@@ -171,20 +156,14 @@ def save_data_product():
         get_data_url(data_url[0], results, data_url[2], data_url[1], total_data)
         total_data+=1
     
-    with open("tokopedia_raw_dataset.csv", 'w', encoding="utf-8-sig", newline="") as file:
+    with open("tokopedia_raw_dataset.csv", 'a', encoding="utf-8-sig", newline="") as file:
         writer = csv.DictWriter(file, keywords.headers)
         writer.writeheader()
         writer.writerows(results)
-        # Back to home
-        # tokopedia_logo = driver.find_element(By.XPATH, "//a[@data-testid='icnHeaderIcon'] | //a[@class='css-isbo03 e1cyykyf0']")
-        # driver.execute_script("arguments[0].click()", tokopedia_logo)
-        # time.sleep(2)
-
-    # driver.save_screenshot("Home.png")
 
 def menu():
+    # save_url()
     save_data_product()
-    save_url()
     
 
 if __name__ == "__main__":
