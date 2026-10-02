@@ -2,6 +2,7 @@ import time
 from bs4 import BeautifulSoup
 import random
 import csv
+import os
 
 import undetected_chromedriver as uc
 from selenium import webdriver
@@ -68,11 +69,8 @@ def click_more(keyword):
 
             scroll+=1
         print("Total data:", len(driver.find_elements(By.XPATH, "//div[@class='css-5wh65g']")))
-    except Exception as e:
-            print(f"Timeout to Click More Keyword {keyword}")
-            print(f"Error Type: {type(e).__name__}")
-            print(f"Error: {e}")
-
+    except:
+        print(f"Timeout to Click More Keyword {keyword}")
 
 def get_data_url(product_url, result:list, search_position, keyword, total_data):
     print(f"Data {total_data}")
@@ -109,12 +107,10 @@ def get_data_url(product_url, result:list, search_position, keyword, total_data)
         ]
 
         result.append(dict(zip(keywords.headers, value)))
-
-    except Exception as e:
+        return True
+    except:
         print(f"Timeout to get data {total_data}, keyword {keyword}")
-
-    print(f"succesfully retrieved all data in link {search_position}\n")
-
+        return False
 
 def save_url():
     print("===== STARTING TO SCRAPING THE DATA =====")
@@ -153,19 +149,26 @@ def save_data_product():
     for keyword in keywords.keywords:
         support.get_product_url(product_url, keyword)
     for data_url in product_url:
-        get_data_url(data_url[0], results, data_url[2], data_url[1], total_data)
+        while True:
+            if get_data_url(data_url[0], results, data_url[2], data_url[1], total_data):
+                break
+            else:
+                get_data_url(data_url[0], results, data_url[2], data_url[1], total_data)
+                break
+        print(f"succesfully retrieved all data in link {data_url[2]}\n")
         total_data+=1
     
     with open("tokopedia_raw_dataset.csv", 'a', encoding="utf-8-sig", newline="") as file:
         writer = csv.DictWriter(file, keywords.headers)
-        writer.writeheader()
+        if os.path.getsize("tokopedia_raw_dataset.csv") == 0:
+            writer.writeheader()
         writer.writerows(results)
 
 def menu():
-    # save_url()
+    if not os.path.isdir("product_urls"):
+        save_url()
     save_data_product()
     
-
 if __name__ == "__main__":
     try:
         menu()
